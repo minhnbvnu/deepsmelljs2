@@ -14,17 +14,17 @@ We executed all of these models on the same benchmark datasets.
  - We re-run three different auto-encoder architectures: *AE-DNN*, *AE-CNN* and *AE-LSTM*. These architectures were previously introduced in a recent study by Sharma et al. [1] and showed promising results.
     
     ```
-        > cd /program
-        > cd /dl_models
-        > python autoencoder.py
+    > cd /program
+    > cd /dl_models
+    > python autoencoder.py
     ```
  - Our proposed architecture *DeepSmells* and a variant called *DeepSmells-BiLSTM*.
     
     The hyperparameters can be configured in the run.sh file.
     ```
-        > cd /program
-        > cd /ease_deepsmells
-        > bash run.sh
+    > cd /program
+    > cd /ease_deepsmells
+    > bash run.sh
     ```
 
 ## **References**
