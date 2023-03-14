@@ -27,10 +27,6 @@ import time
 import datetime
 from config import argument
 
-# ========================================
-# pip install -q --upgrade transformers
-# ========================================
-
 args = argument()
 
 if __name__ == "__main__":

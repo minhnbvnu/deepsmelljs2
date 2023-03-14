@@ -10,3 +10,8 @@ python ./program/ease_deepsmells/main.py \
     --hidden_size_lstm 100 \
     --checkpoint_dir "/content/drive/MyDrive/LabRISE/CodeSmell/DeepSmells/program/ease_deepsmells/checkpoint" \
     --tracking_dir "/content/drive/MyDrive/LabRISE/CodeSmell/DeepSmells/program/ease_deepsmells/tracking/"
+
+# Here is the configure of the model
+# --smell: "ComplexMethod", "ComplexConditional", "FeatureEnvy" and "MultifacetedAbstraction"
+# --model: "DeepSmells" or "DeepSmells-BiLSTM"
+# --hidden_size_lstm: the hidden size of the LSTM layer. You need to flexible change depending on the smell dataset.
