@@ -523,7 +523,7 @@ def run_final():
 
 
 if __name__ == "__main__":
-    smell_list = ["ComplexMethod", "ComplexConditional", "MultifacetedAbstraction", "FeatureEnvy"]
+    smell_list = ["ComplexMethod"]
 
     for smell in smell_list:
         data_path = os.path.join(TOKENIZER_OUT_PATH, smell, DIM)
