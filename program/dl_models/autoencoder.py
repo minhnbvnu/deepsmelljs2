@@ -15,7 +15,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from tensorflow.keras.layers import Input, Dense, LSTM, TimeDistributed, Conv1D, MaxPooling1D, UpSampling1D
+from tensorflow.keras.layers import Input, Dense, LSTM, TimeDistributed, Conv1D, MaxPooling1D, UpSampling1D, ZeroPadding1D
 from tensorflow.keras.models import Model
 import tensorflow.keras.optimizers as opt
 import configuration
@@ -127,6 +127,13 @@ def autoencoder_cnn(data, config):
                             activation="relu",
                             kernel_initializer='random_uniform')(prev_layer)
         prev_layer = UpSampling1D((config.pooling_window))(prev_layer)
+    upsampling_factor = data.max_input_length // prev_layer.shape[1]
+    # Adjust the upsampling factor and padding
+    prev_layer = UpSampling1D(size=upsampling_factor)(prev_layer)
+    padding = data.max_input_length - prev_layer.shape[1]
+    prev_layer = ZeroPadding1D(padding=(0,padding))(prev_layer)
+
+    prev_layer = Conv1D(1, config.kernel, activation='relu', padding='same')(prev_layer)
     prev_layer = Dense(1, activation='relu')(prev_layer)
     autoencoder = Model(inputs=input_layer, outputs=prev_layer)
 
@@ -523,7 +530,7 @@ def run_final():
 
 
 if __name__ == "__main__":
-    smell_list = ["ComplexMethod", "ComplexConditional", "MultifacetedAbstraction", "FeatureEnvy"]
+    smell_list = ["ComplexMethod"]
 
     for smell in smell_list:
         data_path = os.path.join(TOKENIZER_OUT_PATH, smell, DIM)

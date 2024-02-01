@@ -5,7 +5,7 @@ import platform
 from sklearn.model_selection import train_test_split
 
 import sys 
-sys.path.insert(0, r'/content/drive/MyDrive/LabRISE/CodeSmell/DeepSmells/program/dl_models')
+sys.path.insert(0, r'/Users/nguyenbinhminh/MasterUET/Thesis/DeepSmells/program/dl_models')
 import inputs
 import input_data
 
