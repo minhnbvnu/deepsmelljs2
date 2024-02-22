@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./program/dl_models"
+    ]
+}

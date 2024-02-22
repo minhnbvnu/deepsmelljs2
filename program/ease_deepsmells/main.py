@@ -31,16 +31,17 @@ args = argument()
 
 if __name__ == "__main__":
     pos_weight_set = [
-        torch.tensor(1.0, dtype=torch.float), 
-        torch.tensor(2.0, dtype=torch.float), 
+        torch.tensor(1.0, dtype=torch.float),
+        torch.tensor(2.0, dtype=torch.float),
         torch.tensor(4.0, dtype=torch.float),
-        torch.tensor(8.0, dtype=torch.float), 
-        torch.tensor(12.0, dtype=torch.float), 
+        torch.tensor(8.0, dtype=torch.float),
+        torch.tensor(12.0, dtype=torch.float),
         torch.tensor(32.0, dtype=torch.float),
-        torch.tensor(84.0, dtype=torch.float)
+        torch.tensor(84.0, dtype=torch.float),
     ]
 
-    kernel_size_set = [3, 4, 5, 6, 7]
+    # kernel_size_set = [3, 4, 5, 6, 7]
+    kernel_size_set = [4]
 
     SMELL = args.smell
     now = datetime.datetime.now()
@@ -61,33 +62,45 @@ if __name__ == "__main__":
     for pos_weight in pos_weight_set:
         for kernel_size in kernel_size_set:
             # Calculate size LSTM - CC
-            input_size_lstm = calculate_size_lstm(input_size=length_code, kernel_size=kernel_size)
+            input_size_lstm = calculate_size_lstm(
+                input_size=length_code, kernel_size=kernel_size
+            )
 
             # Initialize the model, optimizer, scheduler, loss
-            if args.model == 'DeepSmells':
-                model = CNN_LSTM(kernel_size = kernel_size, input_size_lstm=input_size_lstm, hidden_size_lstm=args.hidden_size_lstm).to(config.Config.DEVICE)
-            if args.model == 'DeepSmells-BiLSTM':
-                model = CNN_BiLSTM(kernel_size = kernel_size, input_size_lstm=input_size_lstm, hidden_size_lstm=args.hidden_size_lstm).to(config.Config.DEVICE)
+            if args.model == "DeepSmells":
+                model = CNN_LSTM(
+                    kernel_size=kernel_size,
+                    input_size_lstm=input_size_lstm,
+                    hidden_size_lstm=args.hidden_size_lstm,
+                ).to(config.Config.DEVICE)
+            if args.model == "DeepSmells-BiLSTM":
+                model = CNN_BiLSTM(
+                    kernel_size=kernel_size,
+                    input_size_lstm=input_size_lstm,
+                    hidden_size_lstm=args.hidden_size_lstm,
+                ).to(config.Config.DEVICE)
             optimizer = optim.SGD(model.parameters(), lr=args.lr)
             # step_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.8)
 
-            train_loss_fn, valid_loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight), nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-            
+            train_loss_fn, valid_loss_fn = nn.BCEWithLogitsLoss(
+                pos_weight=pos_weight
+            ), nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+
             trainer = train.Trainer(
-                device = config.Config.DEVICE,
-                dataloader = (train_loader, valid_loader),
-                model = model,
-                loss_fns = (train_loss_fn, valid_loss_fn),
-                optimizer = optimizer,
+                device=config.Config.DEVICE,
+                dataloader=(train_loader, valid_loader),
+                model=model,
+                loss_fns=(train_loss_fn, valid_loss_fn),
+                optimizer=optimizer,
                 # scheduler = step_lr_scheduler,
             )
 
             best_precision, best_recall, best_f1, best_mcc = trainer.fit(
-                epochs = args.nb_epochs,
-                output_dir = args.checkpoint_dir,
-                track_dir = args.tracking_dir,
-                custom_name = f'Model_RQ1_{SMELL}_{args.model}_{now.strftime("%d%m%Y_%H%M")}_posweight_{pos_weight.item()}_kernel_{kernel_size}',
-                threshold = args.threshold,
+                epochs=args.nb_epochs,
+                output_dir=args.checkpoint_dir,
+                track_dir=args.tracking_dir,
+                custom_name=f'Model_RQ1_{SMELL}_{args.model}_{now.strftime("%d%m%Y_%H%M")}_posweight_{pos_weight.item()}_kernel_{kernel_size}',
+                threshold=args.threshold,
             )
 
             # del model, optimizer, train_loss_fn, valid_loss_fn, trainer, best_precision, best_recall, best_f1, best_mcc
