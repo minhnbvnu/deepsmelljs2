@@ -1,7 +1,7 @@
 python ./program/ease_deepsmells/main.py \
     --data "/Users/nguyenbinhminh/MasterUET/Thesis/DeepSmells-jsdata/data/tokenizer_cs"\
     --smell "ComplexMethod" \
-    --model "DeepSmells-BiLSTM" \
+    --model "DeepSmells-CodeBertLSTM" \
     --nb_epochs  60 \
     --train_batchsize 128 \
     --valid_batchsize 128 \

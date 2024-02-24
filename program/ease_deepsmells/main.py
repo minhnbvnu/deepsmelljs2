@@ -22,7 +22,7 @@ import config
 import utils
 import data
 import train
-from model import CNN_LSTM, CNN_BiLSTM, calculate_size_lstm
+from model import CNN_LSTM, CNN_BiLSTM, calculate_size_lstm, CNN_LSTM_CodeBERT
 import time
 import datetime
 from config import argument
@@ -32,12 +32,12 @@ args = argument()
 if __name__ == "__main__":
     pos_weight_set = [
         torch.tensor(1.0, dtype=torch.float),
-        torch.tensor(2.0, dtype=torch.float),
+        # torch.tensor(2.0, dtype=torch.float),
         torch.tensor(4.0, dtype=torch.float),
-        torch.tensor(8.0, dtype=torch.float),
-        torch.tensor(12.0, dtype=torch.float),
-        torch.tensor(32.0, dtype=torch.float),
-        torch.tensor(84.0, dtype=torch.float),
+        # torch.tensor(8.0, dtype=torch.float),
+        # torch.tensor(12.0, dtype=torch.float),
+        # torch.tensor(32.0, dtype=torch.float),
+        # torch.tensor(84.0, dtype=torch.float),
     ]
 
     # kernel_size_set = [3, 4, 5, 6, 7]
@@ -75,6 +75,12 @@ if __name__ == "__main__":
                 ).to(config.Config.DEVICE)
             if args.model == "DeepSmells-BiLSTM":
                 model = CNN_BiLSTM(
+                    kernel_size=kernel_size,
+                    input_size_lstm=input_size_lstm,
+                    hidden_size_lstm=args.hidden_size_lstm,
+                ).to(config.Config.DEVICE)
+            if args.model == "DeepSmells-CodeBertLSTM":
+                model = CNN_LSTM_CodeBERT(
                     kernel_size=kernel_size,
                     input_size_lstm=input_size_lstm,
                     hidden_size_lstm=args.hidden_size_lstm,
