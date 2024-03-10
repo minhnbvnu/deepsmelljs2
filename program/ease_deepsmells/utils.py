@@ -59,13 +59,17 @@ def get_all_data(data_path, smell, train_validate_ratio=0.7):
         max_eval_samples = 50000  # for design smells (classes)
 
     # Load training and eval data
-    train_data, train_labels, eval_data, eval_labels, max_input_length = (
-        inputs.get_data(
-            data_path,
-            train_validate_ratio=train_validate_ratio,
-            max_training_samples=5000,
-            max_eval_samples=max_eval_samples,
-        )
+    (
+        train_data,
+        train_labels,
+        eval_data,
+        eval_labels,
+        max_input_length,
+    ) = inputs.get_data(
+        data_path,
+        train_validate_ratio=train_validate_ratio,
+        max_training_samples=5000,
+        max_eval_samples=max_eval_samples,
     )
     # train_data = train_data.reshape((len(train_labels), max_input_length))
     # eval_data = eval_data.reshape((len(eval_labels), max_input_length))
@@ -83,9 +87,12 @@ def get_all_data(data_path, smell, train_validate_ratio=0.7):
     train_data, valid_data, train_labels, valid_labels = train_test_split(
         data, labels, test_size=0.3, random_state=0, stratify=labels
     )
-
     return input_data.Input_data(
-        train_data, train_labels, valid_data, valid_labels, max_input_length
+        train_data,
+        train_labels,
+        valid_data,
+        valid_labels,
+        max_input_length,
     )
 
 

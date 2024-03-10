@@ -135,54 +135,55 @@ def calculate_size_lstm(input_size, kernel_size):
     return out
 
 
-class CNN_LSTM_CodeBERT(CNN_LSTM):
-    def __init__(
-        self,
-        kernel_size,
-        input_size_lstm,
-        hidden_size_lstm,
-        input_dim=1,
-        conv_dim1=16,
-        conv_dim2=32,
-        hidden_fc1=64,
-        hidden_fc2=64,
-        num_classes=1,
-    ):
-        super(CNN_LSTM_CodeBERT, self).__init__(
-            kernel_size,
-            input_size_lstm,
-            hidden_size_lstm,
-            input_dim,
-            conv_dim1,
-            conv_dim2,
-            hidden_fc1,
-            hidden_fc2,
-            num_classes,
+class CNN_LSTM_CodeBERT(nn.Module):
+    def __init__(self, hidden_size):
+        super(CNN_LSTM_CodeBERT, self).__init__()
+
+        self.roberta = RobertaModel.from_pretrained(
+            "microsoft/codebert-base",
+        )
+        self.tokenizer = RobertaTokenizer.from_pretrained(
+            "microsoft/codebert-base",
+        )
+        self.classifier = nn.Linear(hidden_size, 1)
+        self.rnn = nn.RNN(
+            self.roberta.config.hidden_size,
+            hidden_size=hidden_size,
+            batch_first=True,
         )
 
-        self.codebert = RobertaModel.from_pretrained("microsoft/codebert-base")
-        self.tokenizer = RobertaTokenizer.from_pretrained("microsoft/codebert-base")
+    def forward(self, texts):  # assuming texts is a tensor
+        max_sequence_length = 512  # Maximum sequence length supported by RoBERTa
+        segment_size = 128  # Segment size for splitting the code
 
-    def forward(self, texts: torch.Tensor):  # assuming texts is a tensor
-        # Pass input tensor through CodeBERT to get embeddings
-        codebert_outputs = self.codebert(texts)
+        # Break the long_code_tensor into segments
+        segments = [
+            texts[:, i : i + segment_size]
+            for i in range(0, texts.shape[1], segment_size)
+        ]
 
-        # Get the last hidden state (CLS token) as embeddings
-        embeddings = codebert_outputs.last_hidden_state
+        # Initialize list to store representations of segments
+        segment_representations = []
 
-        # Reshape embeddings to match the input size expected by the convolutional layers
-        embeddings = embeddings.transpose(1, 2)  # swap dimensions for 1D convolution
+        # Iterate over segments and obtain representations
+        for segment in segments:
+            # Pass the segment through RoBERTa model
+            with torch.no_grad():
+                outputs = self.roberta(input_ids=segment)
+                segment_representation = outputs.last_hidden_state.mean(dim=1).squeeze(
+                    0
+                )  # Average pooling over tokens
+                segment_representations.append(segment_representation)
 
-        # Pass embeddings through convolutional layers
-        conv_out = self.conv_layers(embeddings)
+        # Stack segment representations along the sequence dimension
+        stacked_representations = torch.stack(segment_representations, dim=1)
 
-        # Pass output through LSTM
-        lstm_out, _ = self.lstm(conv_out)  # <-- Check this line
+        # Pass the stacked representations through the RNN
+        rnn_output, _ = self.rnn(stacked_representations)
 
-        # Flatten LSTM output
-        lstm_out = lstm_out[:, -1, :]  # Select last time step
-
-        # Pass flattened output through dense layers
-        dense_out = self.dense_layers(lstm_out)
-
-        return dense_out
+        # Apply global representation to the classifier
+        output = self.classifier(
+            rnn_output[:, -1, :]
+        )  # Take the last hidden state of the RNN
+        print("output", output)
+        return output

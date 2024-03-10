@@ -12,25 +12,25 @@ from sklearn.utils import shuffle
 
 # It is useful for embedding layer: right now we dont have it.
 def find_max_individual_token(folder):
-    '''
-        :param folder: contain tokenizer file
-        
-        Return: The maximum value of all file in the folder
-    '''
+    """
+    :param folder: contain tokenizer file
+
+    Return: The maximum value of all file in the folder
+    """
     max_value = 0
     for root, dirs, files in os.walk(folder):
         for file in files:
             if file.startswith("."):
                 continue
             filepath = os.path.join(root, file)
-            input_str = open(filepath, 'r', errors='ignore').read()
+            input_str = open(filepath, "r", errors="ignore").read()
             input_str = input_str.replace("\\t", " ")
             np_arr = np.fromstring(input_str, dtype=np.int32, sep=" ")
             for item in np_arr:
                 if item > max_value:
                     max_value = item
                 if item < 0:
-                    if (os.path.exists(filepath)):
+                    if os.path.exists(filepath):
                         os.remove(filepath)
                     # print("negative value found in " + file)
     return max_value
@@ -43,6 +43,7 @@ def find_max_individual_token(folder):
 #     max_width, max_height = find_input_size(params.POSITIVE_CASES, max_width, max_height)
 #     max_width, max_height = find_input_size(params.NEGATIVE_CASES, max_width, max_height)
 #     return max_width, max_height
+
 
 def find_input_size(folder, max_width, max_height):
     """
@@ -85,7 +86,7 @@ def find_tokenized_input_size_1d(folder, max_width):
     """
     It walks through a directory, finds all the files, and then finds the maximum width of the input
     files
-    
+
     :param folder: the folder where the input files are stored
     :param max_width: the maximum width of the input data
     :return: The number of digits at all files in the folder
@@ -94,7 +95,7 @@ def find_tokenized_input_size_1d(folder, max_width):
         for file in files:
             if file.startswith("."):
                 continue
-            input_str = open(os.path.join(root, file), 'r', errors='ignore').read()
+            input_str = open(os.path.join(root, file), "r", errors="ignore").read()
             input_str = input_str.replace("\\t", " ")
             np_arr = np.fromstring(input_str, dtype=np.int32, sep=" ")
             cur_width = len(np_arr)
@@ -110,6 +111,7 @@ def find_tokenized_input_size_1d(folder, max_width):
 #     max_width = find_input_size_1d(params.NEGATIVE_CASES, max_width)
 #     return max_width
 
+
 # Returns the max dimension of the tokenized input in 1 dimension
 # all refers to both positive and negative
 def tokenized_input_size_1d_all(pos_folder, neg_folder):
@@ -122,12 +124,12 @@ def tokenized_input_size_1d_all(pos_folder, neg_folder):
 def item_line_count(path):
     """
     It returns the number of lines in a file
-    
+
     :param path: The path to the file you want to count the lines of
     :return: The number of lines in the file.
     """
     if isfile(path):
-        return len(open(path, 'rb').readlines())
+        return len(open(path, "rb").readlines())
     else:
         return 0
 
@@ -135,7 +137,7 @@ def item_line_count(path):
 def get_total_cases_2d(folder_path):
     """
     It counts the number of lines in a file that are less than 2 characters long
-    
+
     :param folder_path: the path to the folder containing the files
     :return: The number of cases in the folder.
     """
@@ -143,7 +145,7 @@ def get_total_cases_2d(folder_path):
     for file in os.listdir(folder_path):
         filepath = os.path.join(folder_path, file)
         if os.path.isfile(filepath):
-            with open(filepath, "r", errors='ignore') as f:
+            with open(filepath, "r", errors="ignore") as f:
                 for line in f:
                     if len(line) < 2:
                         count += 1
@@ -155,11 +157,13 @@ def get_total_cases(folder_path):
     """
     It takes a folder path as input, and returns the sum of the number of lines in each file in that
     folder
-    
+
     :param folder_path: The path to the folder containing the files
     :return: The total number of cases in the folder.
     """
-    return sum(map(lambda item: item_line_count(join(folder_path, item)), listdir(folder_path)))
+    return sum(
+        map(lambda item: item_line_count(join(folder_path, item)), listdir(folder_path))
+    )
     # return len([name for name in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, name))])
     # count =0
     # for file in os.listdir(folder_path):
@@ -168,7 +172,9 @@ def get_total_cases(folder_path):
     # return count
 
 
-def get_data_balanced(data_path, train_validate_ratio=0.7, max_training_samples=5000, is_final=False):
+def get_data_balanced(
+    data_path, train_validate_ratio=0.7, max_training_samples=5000, is_final=False
+):
     max_input_length = get_outlier_threshold(data_path, z=1)
 
     # Positive cases
@@ -178,7 +184,9 @@ def get_data_balanced(data_path, train_validate_ratio=0.7, max_training_samples=
     total_positive_cases = len(pos_data_arr)
 
     total_training_positive_cases = int(train_validate_ratio * total_positive_cases)
-    total_eval_positive_cases = int(total_positive_cases - total_training_positive_cases)
+    total_eval_positive_cases = int(
+        total_positive_cases - total_training_positive_cases
+    )
     if total_training_positive_cases > max_training_samples:
         total_training_positive_cases = max_training_samples
 
@@ -189,7 +197,9 @@ def get_data_balanced(data_path, train_validate_ratio=0.7, max_training_samples=
     total_negative_cases = len(neg_data_arr)
 
     total_training_negative_cases = int(train_validate_ratio * total_negative_cases)
-    total_eval_negative_cases = int(total_negative_cases - total_training_negative_cases)
+    total_eval_negative_cases = int(
+        total_negative_cases - total_training_negative_cases
+    )
 
     # if not is_final:
     #     total_training_positive_cases = int(total_training_positive_cases/2)
@@ -204,22 +214,24 @@ def get_data_balanced(data_path, train_validate_ratio=0.7, max_training_samples=
 
     training_labels = np.empty(shape=[len(training_data_arr)], dtype=np.float32)
     training_labels[0:total_training_positive_cases] = 1.0
-    training_labels[total_training_positive_cases:len(training_data_arr)] = 0.0
+    training_labels[total_training_positive_cases : len(training_data_arr)] = 0.0
 
     # random_under_sampler = RandomUnderSampler(random_state=42)
     # training_data_arr_resampled, training_labels_arr_resampled = random_under_sampler.fit_resample(training_data_arr,
     #                                                                                                training_labels)
 
     eval_data = []
-    eval_data.extend(pos_data_arr[len(pos_data_arr) - total_eval_positive_cases:])
-    eval_data.extend(neg_data_arr[len(neg_data_arr) - total_eval_negative_cases:])
+    eval_data.extend(pos_data_arr[len(pos_data_arr) - total_eval_positive_cases :])
+    eval_data.extend(neg_data_arr[len(neg_data_arr) - total_eval_negative_cases :])
     eval_data_arr = np.array(eval_data, dtype=np.float32)
 
     eval_labels = np.empty(shape=[len(eval_data_arr)], dtype=np.float32)
     eval_labels[0:total_eval_positive_cases] = 1.0
     eval_labels[total_eval_positive_cases:] = 0.0
 
-    training_data = training_data_arr.reshape((len(training_labels), max_input_length, 1))
+    training_data = training_data_arr.reshape(
+        (len(training_labels), max_input_length, 1)
+    )
     eval_data = eval_data_arr.reshape((len(eval_labels), max_input_length, 1))
     training_data, training_labels = shuffle(training_data, training_labels)
     eval_data, eval_labels = shuffle(eval_data, eval_labels)
@@ -227,7 +239,12 @@ def get_data_balanced(data_path, train_validate_ratio=0.7, max_training_samples=
     return training_data, training_labels, eval_data, eval_labels, max_input_length
 
 
-def get_data_autoencoder(data_path, train_validate_ratio=0.7, max_training_samples=5000, max_eval_samples=150000):
+def get_data_autoencoder(
+    data_path,
+    train_validate_ratio=0.7,
+    max_training_samples=5000,
+    max_eval_samples=150000,
+):
     gc.collect()
     max_input_length = get_outlier_threshold(data_path, z=1)
 
@@ -248,10 +265,14 @@ def get_data_autoencoder(data_path, train_validate_ratio=0.7, max_training_sampl
     total_negative_cases = len(neg_data_arr)
 
     total_training_negative_cases = int(train_validate_ratio * total_negative_cases)
-    total_eval_negative_cases = int(total_negative_cases - total_training_negative_cases)
+    total_eval_negative_cases = int(
+        total_negative_cases - total_training_negative_cases
+    )
 
     # We balance training samples and apply max threshold for training sample count
-    total_training_negative_cases = min(max_training_samples, total_training_negative_cases)
+    total_training_negative_cases = min(
+        max_training_samples, total_training_negative_cases
+    )
 
     training_data = []
     # training_data.extend(pos_data_arr[0:total_training_positive_cases])
@@ -264,13 +285,18 @@ def get_data_autoencoder(data_path, train_validate_ratio=0.7, max_training_sampl
 
     # we need to remove extraneous samples from evaluation to keep the compuation in reasonable bounds
     if total_eval_negative_cases > max_eval_samples:
-        removed_sample_percent = (total_eval_negative_cases - max_eval_samples)/total_eval_negative_cases
-        total_eval_positive_cases = int(total_eval_positive_cases - total_eval_positive_cases * removed_sample_percent)
+        removed_sample_percent = (
+            total_eval_negative_cases - max_eval_samples
+        ) / total_eval_negative_cases
+        total_eval_positive_cases = int(
+            total_eval_positive_cases
+            - total_eval_positive_cases * removed_sample_percent
+        )
         total_eval_negative_cases = max_eval_samples
 
     eval_data = []
-    eval_data.extend(pos_data_arr[len(pos_data_arr) - total_eval_positive_cases:])
-    eval_data.extend(neg_data_arr[len(neg_data_arr) - total_eval_negative_cases:])
+    eval_data.extend(pos_data_arr[len(pos_data_arr) - total_eval_positive_cases :])
+    eval_data.extend(neg_data_arr[len(neg_data_arr) - total_eval_negative_cases :])
     eval_data_arr = np.array(eval_data, dtype=np.float32)
 
     eval_labels = np.empty(shape=[len(eval_data_arr)], dtype=np.float32)
@@ -279,7 +305,9 @@ def get_data_autoencoder(data_path, train_validate_ratio=0.7, max_training_sampl
 
     # train_data, eval_data, train_labels, eval_labels = train_test_split(np_arr_all, labels, train_size=train_validate_ratio)
     # training_data = training_data_arr.reshape((len(training_data_arr), max_input_length, 1))
-    training_data = training_data_arr.reshape((len(training_data_arr), max_input_length))
+    training_data = training_data_arr.reshape(
+        (len(training_data_arr), max_input_length)
+    )
     # eval_data = eval_data_arr.reshape((len(eval_labels), max_input_length, 1))
     eval_data = eval_data_arr.reshape((len(eval_labels), max_input_length))
     training_data = shuffle(training_data)
@@ -287,10 +315,18 @@ def get_data_autoencoder(data_path, train_validate_ratio=0.7, max_training_sampl
 
     return training_data, eval_data, eval_labels, max_input_length
 
-def get_data(data_path, train_validate_ratio=0.7, max_training_samples=5000, max_eval_samples=150000, is_c2v=False):
+
+def get_data(
+    data_path,
+    train_validate_ratio=0.7,
+    max_training_samples=5000,
+    max_eval_samples=150000,
+    is_c2v=False,
+):
     gc.collect()
 
     max_input_length = get_outlier_threshold(data_path, z=1, is_c2v=is_c2v)
+    print("max_input_length", max_input_length)
 
     all_inputs = []
     # Positive cases
@@ -300,7 +336,9 @@ def get_data(data_path, train_validate_ratio=0.7, max_training_samples=5000, max
     total_positive_cases = len(pos_data_arr)
 
     total_training_positive_cases = int(train_validate_ratio * total_positive_cases)
-    total_eval_positive_cases = int(total_positive_cases - total_training_positive_cases)
+    total_eval_positive_cases = int(
+        total_positive_cases - total_training_positive_cases
+    )
 
     # Negative cases
     folder_path = os.path.join(data_path, "Negative")
@@ -309,12 +347,15 @@ def get_data(data_path, train_validate_ratio=0.7, max_training_samples=5000, max
     total_negative_cases = len(neg_data_arr)
 
     total_training_negative_cases = int(train_validate_ratio * total_negative_cases)
-    total_eval_negative_cases = int(total_negative_cases - total_training_negative_cases)
+    total_eval_negative_cases = int(
+        total_negative_cases - total_training_negative_cases
+    )
 
     # We balance training samples and apply max threshold for training sample count
-    total_training_positive_cases = total_training_negative_cases = min(max_training_samples,
-                                                                        min(total_training_positive_cases,
-                                                                            total_training_negative_cases))
+    total_training_positive_cases = total_training_negative_cases = min(
+        max_training_samples,
+        min(total_training_positive_cases, total_training_negative_cases),
+    )
 
     training_data = []
     training_data.extend(pos_data_arr[0:total_training_positive_cases])
@@ -323,20 +364,25 @@ def get_data(data_path, train_validate_ratio=0.7, max_training_samples=5000, max
 
     training_labels = np.empty(shape=[len(training_data_arr)], dtype=np.float32)
     training_labels[0:total_training_positive_cases] = 1.0
-    training_labels[total_training_positive_cases:len(training_data_arr)] = 0.0
+    training_labels[total_training_positive_cases : len(training_data_arr)] = 0.0
 
     # just for experiments
     # total_eval_negative_cases = min(len(neg_data_arr) - total_eval_negative_cases, total_eval_positive_cases * 2)
 
     # we need to remove extraneous samples from evaluation to keep the compuation in reasonable bounds
     if total_eval_negative_cases > max_eval_samples:
-        removed_sample_percent = (total_eval_negative_cases - max_eval_samples) / total_eval_negative_cases
-        total_eval_positive_cases = int(total_eval_positive_cases - total_eval_positive_cases * removed_sample_percent)
+        removed_sample_percent = (
+            total_eval_negative_cases - max_eval_samples
+        ) / total_eval_negative_cases
+        total_eval_positive_cases = int(
+            total_eval_positive_cases
+            - total_eval_positive_cases * removed_sample_percent
+        )
         total_eval_negative_cases = max_eval_samples
 
     eval_data = []
-    eval_data.extend(pos_data_arr[len(pos_data_arr) - total_eval_positive_cases:])
-    eval_data.extend(neg_data_arr[len(neg_data_arr) - total_eval_negative_cases:])
+    eval_data.extend(pos_data_arr[len(pos_data_arr) - total_eval_positive_cases :])
+    eval_data.extend(neg_data_arr[len(neg_data_arr) - total_eval_negative_cases :])
     eval_data_arr = np.array(eval_data, dtype=np.float32)
 
     eval_labels = np.empty(shape=[len(eval_data_arr)], dtype=np.float32)
@@ -363,40 +409,58 @@ def get_data(data_path, train_validate_ratio=0.7, max_training_samples=5000, max
     #                          total_eval_positive_cases, total_eval_negative_cases)
     #
     # train_data, eval_data, train_labels, eval_labels = train_test_split(np_arr_all, labels, train_size=train_validate_ratio)
-    training_data = training_data_arr.reshape((len(training_labels), max_input_length, 1))
-    eval_data = eval_data_arr.reshape((len(eval_labels), max_input_length, 1))
+    print(
+        "training_data_arr.shape", training_data_arr[0].shape, training_data_arr.shape
+    )
+    # training_data = training_data_arr.reshape(
+    #     (len(training_labels), max_input_length, 1)
+    # )
+    # eval_data = eval_data_arr.reshape((len(eval_labels), max_input_length, 1))
     training_data, training_labels = shuffle(training_data, training_labels)
     eval_data, eval_labels = shuffle(eval_data, eval_labels)
 
     return training_data, training_labels, eval_data, eval_labels, max_input_length
 
 
-def get_data_rq2(training_data_path, eval_data_path, 
-                    # out_folder, case_string, 
-                    train_validate_ratio=0.7,
-                    max_training_samples=5000, max_eval_samples=150000):
+def get_data_rq2(
+    training_data_path,
+    eval_data_path,
+    # out_folder, case_string,
+    train_validate_ratio=0.7,
+    max_training_samples=5000,
+    max_eval_samples=150000,
+):
     gc.collect()
 
     max_input_length = get_outlier_threshold(training_data_path, z=1)
 
-    tr_pos_data_arr = _retrieve_data(os.path.join(training_data_path, "Positive"), max_input_length)
+    tr_pos_data_arr = _retrieve_data(
+        os.path.join(training_data_path, "Positive"), max_input_length
+    )
     total_tr_positive_cases = len(tr_pos_data_arr)
     total_training_positive_cases = int(train_validate_ratio * total_tr_positive_cases)
 
-    ev_pos_data_arr = _retrieve_data(os.path.join(eval_data_path, "Positive"), max_input_length)
+    ev_pos_data_arr = _retrieve_data(
+        os.path.join(eval_data_path, "Positive"), max_input_length
+    )
     total_eval_positive_cases = len(ev_pos_data_arr)
 
-    tr_neg_data_arr = _retrieve_data(os.path.join(training_data_path, "Negative"), max_input_length)
+    tr_neg_data_arr = _retrieve_data(
+        os.path.join(training_data_path, "Negative"), max_input_length
+    )
     total_tr_negative_cases = len(tr_neg_data_arr)
     total_training_negative_cases = int(train_validate_ratio * total_tr_negative_cases)
 
-    ev_neg_data_arr = _retrieve_data(os.path.join(eval_data_path, "Negative"), max_input_length)
+    ev_neg_data_arr = _retrieve_data(
+        os.path.join(eval_data_path, "Negative"), max_input_length
+    )
     total_eval_negative_cases = len(ev_neg_data_arr)
 
     # We balance training samples and apply max threshold for training sample count
-    total_training_positive_cases = total_training_negative_cases = min(max_training_samples,
-                                                                        min(total_training_positive_cases,
-                                                                            total_training_negative_cases))
+    total_training_positive_cases = total_training_negative_cases = min(
+        max_training_samples,
+        min(total_training_positive_cases, total_training_negative_cases),
+    )
 
     training_data = []
     training_data.extend(tr_pos_data_arr[0:total_training_positive_cases])
@@ -405,8 +469,13 @@ def get_data_rq2(training_data_path, eval_data_path,
 
     # we need to remove extraneous samples from evaluation to keep the compuation in reasonable bounds
     if total_eval_negative_cases > max_eval_samples:
-        removed_sample_percent = (total_eval_negative_cases - max_eval_samples) / total_eval_negative_cases
-        total_eval_positive_cases = int(total_eval_positive_cases - total_eval_positive_cases * removed_sample_percent)
+        removed_sample_percent = (
+            total_eval_negative_cases - max_eval_samples
+        ) / total_eval_negative_cases
+        total_eval_positive_cases = int(
+            total_eval_positive_cases
+            - total_eval_positive_cases * removed_sample_percent
+        )
         total_eval_negative_cases = max_eval_samples
 
     eval_data = []
@@ -416,13 +485,15 @@ def get_data_rq2(training_data_path, eval_data_path,
 
     training_labels = np.empty(shape=[len(training_data_arr)], dtype=np.float32)
     training_labels[0:total_training_positive_cases] = 1.0
-    training_labels[total_training_positive_cases:len(training_data_arr)] = 0.0
+    training_labels[total_training_positive_cases : len(training_data_arr)] = 0.0
 
     eval_labels = np.empty(shape=[len(eval_data_arr)], dtype=np.float32)
     eval_labels[0:total_eval_positive_cases] = 1.0
-    eval_labels[total_eval_positive_cases:len(eval_data_arr)] = 0.0
+    eval_labels[total_eval_positive_cases : len(eval_data_arr)] = 0.0
 
-    training_data_arr = training_data_arr.reshape((len(training_labels), max_input_length, 1))
+    training_data_arr = training_data_arr.reshape(
+        (len(training_labels), max_input_length, 1)
+    )
     eval_data_arr = eval_data_arr.reshape((len(eval_labels), max_input_length, 1))
     training_data_arr, training_labels = shuffle(training_data_arr, training_labels)
     eval_data_arr, eval_labels = shuffle(eval_data_arr, eval_labels)
@@ -431,33 +502,56 @@ def get_data_rq2(training_data_path, eval_data_path,
     #                          total_training_positive_cases, total_training_negative_cases,
     #                          total_eval_positive_cases, total_eval_negative_cases)
 
-    return training_data_arr, training_labels, eval_data_arr, eval_labels, max_input_length
+    return (
+        training_data_arr,
+        training_labels,
+        eval_data_arr,
+        eval_labels,
+        max_input_length,
+    )
 
 
-def get_data_2d_rq2(training_data_path, eval_data_path, out_folder, case_string, train_validate_ratio=0.7,
-                    max_training_samples=5000):
+def get_data_2d_rq2(
+    training_data_path,
+    eval_data_path,
+    out_folder,
+    case_string,
+    train_validate_ratio=0.7,
+    max_training_samples=5000,
+):
     gc.collect()
 
-    max_input_width, max_input_height = get_outlier_threshold_2d(training_data_path, z=1)
+    max_input_width, max_input_height = get_outlier_threshold_2d(
+        training_data_path, z=1
+    )
 
-    tr_pos_data_arr = _retrieve_data_2d(os.path.join(training_data_path, "Positive"), max_input_width, max_input_height)
+    tr_pos_data_arr = _retrieve_data_2d(
+        os.path.join(training_data_path, "Positive"), max_input_width, max_input_height
+    )
     total_tr_positive_cases = len(tr_pos_data_arr)
     total_training_positive_cases = int(train_validate_ratio * total_tr_positive_cases)
 
-    ev_pos_data_arr = _retrieve_data_2d(os.path.join(eval_data_path, "Positive"), max_input_width, max_input_height)
+    ev_pos_data_arr = _retrieve_data_2d(
+        os.path.join(eval_data_path, "Positive"), max_input_width, max_input_height
+    )
     total_eval_positive_cases = len(ev_pos_data_arr)
 
-    tr_neg_data_arr = _retrieve_data_2d(os.path.join(training_data_path, "Negative"), max_input_width, max_input_height)
+    tr_neg_data_arr = _retrieve_data_2d(
+        os.path.join(training_data_path, "Negative"), max_input_width, max_input_height
+    )
     total_tr_negative_cases = len(tr_neg_data_arr)
     total_training_negative_cases = int(train_validate_ratio * total_tr_negative_cases)
 
-    ev_neg_data_arr = _retrieve_data_2d(os.path.join(eval_data_path, "Negative"), max_input_width, max_input_height)
+    ev_neg_data_arr = _retrieve_data_2d(
+        os.path.join(eval_data_path, "Negative"), max_input_width, max_input_height
+    )
     total_eval_negative_cases = len(ev_neg_data_arr)
 
     # We balance training samples and apply max threshold for training sample count
-    total_training_positive_cases = total_training_negative_cases = min(max_training_samples,
-                                                                        min(total_training_positive_cases,
-                                                                            total_training_negative_cases))
+    total_training_positive_cases = total_training_negative_cases = min(
+        max_training_samples,
+        min(total_training_positive_cases, total_training_negative_cases),
+    )
 
     training_data = []
     training_data.extend(tr_pos_data_arr[0:total_training_positive_cases])
@@ -471,36 +565,55 @@ def get_data_2d_rq2(training_data_path, eval_data_path, out_folder, case_string,
 
     training_labels = np.empty(shape=[len(training_data_arr)], dtype=np.float32)
     training_labels[0:total_training_positive_cases] = 1.0
-    training_labels[total_training_positive_cases:len(training_data_arr)] = 0.0
+    training_labels[total_training_positive_cases : len(training_data_arr)] = 0.0
 
     eval_labels = np.empty(shape=[len(eval_data_arr)], dtype=np.float32)
     eval_labels[0:total_eval_positive_cases] = 1.0
-    eval_labels[total_eval_positive_cases:len(eval_data_arr)] = 0.0
+    eval_labels[total_eval_positive_cases : len(eval_data_arr)] = 0.0
 
-    training_data_arr = training_data_arr.reshape((len(training_labels), max_input_height, max_input_width, 1))
-    eval_data_arr = eval_data_arr.reshape((len(eval_labels), max_input_height, max_input_width, 1))
+    training_data_arr = training_data_arr.reshape(
+        (len(training_labels), max_input_height, max_input_width, 1)
+    )
+    eval_data_arr = eval_data_arr.reshape(
+        (len(eval_labels), max_input_height, max_input_width, 1)
+    )
     training_data_arr, training_labels = shuffle(training_data_arr, training_labels)
     eval_data_arr, eval_labels = shuffle(eval_data_arr, eval_labels)
 
-    write_input_data_summary(out_folder, case_string,
-                             total_training_positive_cases, total_training_negative_cases,
-                             total_eval_positive_cases, total_eval_negative_cases)
+    write_input_data_summary(
+        out_folder,
+        case_string,
+        total_training_positive_cases,
+        total_training_negative_cases,
+        total_eval_positive_cases,
+        total_eval_negative_cases,
+    )
 
-    return training_data_arr, training_labels, eval_data_arr, eval_labels, max_input_height, max_input_width
+    return (
+        training_data_arr,
+        training_labels,
+        eval_data_arr,
+        eval_labels,
+        max_input_height,
+        max_input_width,
+    )
 
 
 def _retrieve_data(path, max_len, is_c2v=False):
     input = []
     for file in os.listdir(path):
-        with open(os.path.join(path, file), 'r',
-                  errors='ignore') as file_read:
+        with open(os.path.join(path, file), "r", errors="ignore") as file_read:
             for line in file_read:
                 input_str = line.replace("\t", " ")
                 if is_c2v:
-                    arr = np.fromstring(input_str, dtype=np.float, sep=" ", count=max_len)
+                    arr = np.fromstring(
+                        input_str, dtype=np.float, sep=" ", count=max_len
+                    )
                     arr_size = len(np.fromstring(input_str, dtype=np.float, sep=" "))
                 else:
-                    arr = np.fromstring(input_str, dtype=np.int32, sep=" ", count=max_len)
+                    arr = np.fromstring(
+                        input_str, dtype=np.int32, sep=" ", count=max_len
+                    )
                     arr_size = len(np.fromstring(input_str, dtype=np.int32, sep=" "))
                 # We add this file only if the width is less than the outlier threshold
                 if arr_size <= max_len:
@@ -509,7 +622,13 @@ def _retrieve_data(path, max_len, is_c2v=False):
     return input
 
 
-def get_data_2d(data_path, out_folder, case_string, train_validate_ratio=0.7, max_training_samples=5000):
+def get_data_2d(
+    data_path,
+    out_folder,
+    case_string,
+    train_validate_ratio=0.7,
+    max_training_samples=5000,
+):
     gc.collect()
     max_input_width, max_input_height = get_outlier_threshold_2d(data_path, z=1)
 
@@ -521,7 +640,9 @@ def get_data_2d(data_path, out_folder, case_string, train_validate_ratio=0.7, ma
     total_positive_cases = len(pos_data_arr)
 
     total_training_positive_cases = int(train_validate_ratio * total_positive_cases)
-    total_eval_positive_cases = int(total_positive_cases - total_training_positive_cases)
+    total_eval_positive_cases = int(
+        total_positive_cases - total_training_positive_cases
+    )
 
     # Negative cases
     folder_path = os.path.join(data_path, "Negative")
@@ -530,12 +651,15 @@ def get_data_2d(data_path, out_folder, case_string, train_validate_ratio=0.7, ma
     total_negative_cases = len(neg_data_arr)
 
     total_training_negative_cases = int(train_validate_ratio * total_negative_cases)
-    total_eval_negative_cases = int(total_negative_cases - total_training_negative_cases)
+    total_eval_negative_cases = int(
+        total_negative_cases - total_training_negative_cases
+    )
 
     # We balance training samples and apply max threshold for training sample count
-    total_training_positive_cases = total_training_negative_cases = min(max_training_samples,
-                                                                        min(total_training_positive_cases,
-                                                                            total_training_negative_cases))
+    total_training_positive_cases = total_training_negative_cases = min(
+        max_training_samples,
+        min(total_training_positive_cases, total_training_negative_cases),
+    )
 
     training_data = []
     training_data.extend(pos_data_arr[0:total_training_positive_cases])
@@ -544,14 +668,14 @@ def get_data_2d(data_path, out_folder, case_string, train_validate_ratio=0.7, ma
 
     training_labels = np.empty(shape=[len(training_data_arr)], dtype=np.float32)
     training_labels[0:total_training_positive_cases] = 1.0
-    training_labels[total_training_positive_cases:len(training_data_arr)] = 0.0
+    training_labels[total_training_positive_cases : len(training_data_arr)] = 0.0
 
     # just for experiments
     # total_eval_negative_cases = min(len(neg_data_arr) - total_eval_negative_cases, total_eval_positive_cases * 2)
 
     eval_data = []
-    eval_data.extend(pos_data_arr[len(pos_data_arr) - total_eval_positive_cases:])
-    eval_data.extend(neg_data_arr[len(neg_data_arr) - total_eval_negative_cases:])
+    eval_data.extend(pos_data_arr[len(pos_data_arr) - total_eval_positive_cases :])
+    eval_data.extend(neg_data_arr[len(neg_data_arr) - total_eval_negative_cases :])
     eval_data_arr = np.array(eval_data, dtype=np.float32)
 
     eval_labels = np.empty(shape=[len(eval_data_arr)], dtype=np.float32)
@@ -569,17 +693,33 @@ def get_data_2d(data_path, out_folder, case_string, train_validate_ratio=0.7, ma
     # labels[total_positive_cases:len(all_inputs)] = 0
     #
     # input_arr = np.array(all_inputs, dtype=np.float32)
-    write_input_data_summary(out_folder, case_string,
-                             total_training_positive_cases, total_training_negative_cases,
-                             total_eval_positive_cases, total_eval_negative_cases)
+    write_input_data_summary(
+        out_folder,
+        case_string,
+        total_training_positive_cases,
+        total_training_negative_cases,
+        total_eval_positive_cases,
+        total_eval_negative_cases,
+    )
 
     # train_data, eval_data, train_labels, eval_labels = train_test_split(input_arr, labels,
     #                                                                     train_size=train_validate_ratio)
-    training_data = training_data_arr.reshape((len(training_labels), max_input_height, max_input_width, 1))
-    eval_data = eval_data_arr.reshape((len(eval_labels), max_input_height, max_input_width, 1))
+    training_data = training_data_arr.reshape(
+        (len(training_labels), max_input_height, max_input_width, 1)
+    )
+    eval_data = eval_data_arr.reshape(
+        (len(eval_labels), max_input_height, max_input_width, 1)
+    )
     training_data, training_labels = shuffle(training_data, training_labels)
     eval_data, eval_labels = shuffle(eval_data, eval_labels)
-    return training_data, training_labels, eval_data, eval_labels, max_input_height, max_input_width
+    return (
+        training_data,
+        training_labels,
+        eval_data,
+        eval_labels,
+        max_input_height,
+        max_input_width,
+    )
 
 
 def _retrieve_data_2d(path, max_input_width, max_input_height):
@@ -588,7 +728,7 @@ def _retrieve_data_2d(path, max_input_width, max_input_height):
     for file in os.listdir(path):
         if file.startswith("."):
             continue
-        with open(os.path.join(path, file), 'r', errors='ignore') as f:
+        with open(os.path.join(path, file), "r", errors="ignore") as f:
             cur_input = np.zeros((max_input_height, max_input_width), dtype=np.int32)
             is_valid = True
             no_of_lines = 0
@@ -600,13 +740,17 @@ def _retrieve_data_2d(path, max_input_width, max_input_height):
                         input.append(np.array(cur_input, dtype=np.int32))
                     no_of_lines = 0
                     is_valid = True
-                    cur_input = np.zeros((max_input_height, max_input_width), dtype=np.int32)
+                    cur_input = np.zeros(
+                        (max_input_height, max_input_width), dtype=np.int32
+                    )
                     cur_index += 1
                     # print('cur_index: ' + str(cur_index))
                     continue
 
                 if is_valid:
-                    arr = np.fromstring(input_str, dtype=np.int32, sep=" ", count=max_input_width)
+                    arr = np.fromstring(
+                        input_str, dtype=np.int32, sep=" ", count=max_input_width
+                    )
                     arr_size = len(np.fromstring(input_str, dtype=np.int32, sep=" "))
                     # It was earlier: We add this file only if the width is less than the outlier threshold
                     # Its new strategy: We add the sample but truncate the lines more than max_input_width
@@ -648,7 +792,7 @@ def handle_overloaded_methods(path):
             outfilepath = os.path.join(root, f + ".cld")
 
             with open(outfilepath, "w") as filewriter:
-                with open(filepath, errors='ignore') as f:
+                with open(filepath, errors="ignore") as f:
                     longest_line = ""
                     for line in f:
                         if len(line) < 2:
@@ -668,7 +812,7 @@ def _get_outlier_threshold(path, z, is_c2v):
             if f.startswith("."):
                 continue
             filepath = os.path.join(root, f)
-            with open(filepath, "r", errors='ignore') as file:
+            with open(filepath, "r", errors="ignore") as file:
                 for line in file:
                     input_str = line.replace("\t", " ")
                     if is_c2v:
@@ -712,9 +856,9 @@ def _get_outlier_threshold_2d(path, z=2):
             filepath = os.path.join(root, f)
             longest_line_length = 0
             no_of_lines = 0
-            with open(filepath, "r", errors='ignore') as f:
+            with open(filepath, "r", errors="ignore") as f:
                 for line in f:
-                    symbol_length = len(line.split('\t'))
+                    symbol_length = len(line.split("\t"))
                     if len(line) < 2:  # which means current method ends here
                         widths.append(longest_line_length)
                         # in order to keep standard deviation low, removing very high number of lines
@@ -723,10 +867,14 @@ def _get_outlier_threshold_2d(path, z=2):
                         longest_line_length = 0
                         no_of_lines = 0
                     else:
-                        if symbol_length < 1000:  # just to avoid too wide lines. We bumped into a line with 57K and that disrupts the sd and hence thresholds
+                        if (
+                            symbol_length < 1000
+                        ):  # just to avoid too wide lines. We bumped into a line with 57K and that disrupts the sd and hence thresholds
                             no_of_lines += 1
                             input_str = line.replace("\t", " ")
-                            cur_width = len(np.fromstring(input_str, dtype=np.int32, sep=" "))
+                            cur_width = len(
+                                np.fromstring(input_str, dtype=np.int32, sep=" ")
+                            )
                             if cur_width > longest_line_length:
                                 longest_line_length = cur_width
     return compute_max(widths, "width", z=z), compute_max(heights, "height", z=z)
@@ -737,16 +885,18 @@ def compute_max(arr, dim="width", z=2):
     sd = np.std(arr, axis=0)
     final_list = [x for x in arr if (x <= mn + z * sd)]  # upper outliers removed
     rmn2 = len(arr) - len(final_list)
-    print('=================================================')
-    print('{} array size '.format(dim) + str(len(arr)))
-    print('min {} '.format(dim) + str(min(arr, default=0)))
-    print('max {} '.format(dim) + str(max(arr, default=0)))
-    print('mean {} '.format(dim) + str(np.nanmean(arr)))
-    print('standard deviation ' + str(np.std(arr)))
-    print('median {} '.format(dim) + str(np.nanmedian(arr)))
-    print('number of upper outliers removed ' + str(rmn2))
-    print('max {} excluding upper outliers '.format(dim) + str(max(final_list, default=0)))
-    print('=================================================')
+    print("=================================================")
+    print("{} array size ".format(dim) + str(len(arr)))
+    print("min {} ".format(dim) + str(min(arr, default=0)))
+    print("max {} ".format(dim) + str(max(arr, default=0)))
+    print("mean {} ".format(dim) + str(np.nanmean(arr)))
+    print("standard deviation " + str(np.std(arr)))
+    print("median {} ".format(dim) + str(np.nanmedian(arr)))
+    print("number of upper outliers removed " + str(rmn2))
+    print(
+        "max {} excluding upper outliers ".format(dim) + str(max(final_list, default=0))
+    )
+    print("=================================================")
     return max(final_list, default=0)
 
 
@@ -762,7 +912,7 @@ def remove_duplicates_1d(path):
             if os.path.exists(outfilepath):
                 os.remove(outfilepath)
             mydict = dict()
-            with open(filepath, errors='ignore') as f:
+            with open(filepath, errors="ignore") as f:
                 for line in f:
                     if line not in mydict:
                         mydict[line] = line
@@ -776,7 +926,7 @@ def remove_duplicates_1d(path):
 def remove_duplicates_c2v(path):
     mydict = dict()
     # for case in ['Positive', 'Negative']:
-    for case in ['Negative']:
+    for case in ["Negative"]:
         cur_dir_path = os.path.join(path, case)
         for file in os.listdir(cur_dir_path):
             if file.startswith("."):
@@ -787,12 +937,12 @@ def remove_duplicates_c2v(path):
             # outfilepath = os.path.join(root, "temp.cld")
             # if os.path.exists(outfilepath):
             #     os.remove(outfilepath)
-            with open(filepath, errors='ignore') as f:
+            with open(filepath, errors="ignore") as f:
                 for line in f:
                     if line not in mydict:
                         mydict[line] = line
                     else:
-                        print('Duplicate found')
+                        print("Duplicate found")
             # os.remove(filepath)
 
         outfilepath = get_out_file(cur_dir_path)
@@ -811,7 +961,7 @@ def remove_duplicates_c2v(path):
 def get_out_file(path):
     i = 1
     while True:
-        filepath = os.path.join(path, 'samples' + str(i) + '.cvec')
+        filepath = os.path.join(path, "samples" + str(i) + ".cvec")
         if not os.path.exists(filepath):
             return filepath
         i = i + 1
@@ -836,7 +986,7 @@ def remove_duplicates_2d(path):
                 os.remove(outfilepath)
 
             mydict = dict()
-            with open(filepath, errors='ignore') as f:
+            with open(filepath, errors="ignore") as f:
                 cur_sample = ""
                 for line in f:
                     if len(line) > 1:
@@ -880,24 +1030,37 @@ def preprocess_data_2d(tokenizer_out_path):
 
 
 def verify(arr_in, filepath):
-    input_str = open(filepath, 'r',
-                     errors='ignore').read()
+    input_str = open(filepath, "r", errors="ignore").read()
     input_str = input_str.replace("\t", " ")
     arr = np.fromstring(input_str, dtype=np.int32, sep=" ")
-    arr_in = arr_in[0:len(arr)]
-    assert (np.array_equal(arr, arr_in))
+    arr_in = arr_in[0 : len(arr)]
+    assert np.array_equal(arr, arr_in)
 
 
-def write_input_data_summary(out_folder, case_str,
-                             total_training_positive_cases, total_training_negative_cases,
-                             total_eval_positive_cases, total_eval_negative_cases):
+def write_input_data_summary(
+    out_folder,
+    case_str,
+    total_training_positive_cases,
+    total_training_negative_cases,
+    total_eval_positive_cases,
+    total_eval_negative_cases,
+):
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
     f = open(os.path.join(out_folder, case_str + ".txt"), "w")
-    f.write("tr_pos: " + str(total_training_positive_cases) + "\n"
-            + "tr_neg: " + str(total_training_negative_cases) + "\n"
-            + "ev_pos: " + str(total_eval_positive_cases) + "\n"
-            + "ev_neg: " + str(total_eval_negative_cases))
+    f.write(
+        "tr_pos: "
+        + str(total_training_positive_cases)
+        + "\n"
+        + "tr_neg: "
+        + str(total_training_negative_cases)
+        + "\n"
+        + "ev_pos: "
+        + str(total_eval_positive_cases)
+        + "\n"
+        + "ev_neg: "
+        + str(total_eval_negative_cases)
+    )
     f.close()
 
 

@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 
 # lib default python
 import os
@@ -57,7 +57,9 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_set, batch_size=args.train_batchsize, shuffle=True)
     valid_loader = DataLoader(valid_set, batch_size=args.valid_batchsize, shuffle=True)
 
-    length_code = train_set[0][0].size()[1]
+    print(train_set)
+    length_code = len(train_set)
+    print("length_code", length_code)
 
     for pos_weight in pos_weight_set:
         for kernel_size in kernel_size_set:
@@ -80,11 +82,7 @@ if __name__ == "__main__":
                     hidden_size_lstm=args.hidden_size_lstm,
                 ).to(config.Config.DEVICE)
             if args.model == "DeepSmells-CodeBertLSTM":
-                model = CNN_LSTM_CodeBERT(
-                    kernel_size=kernel_size,
-                    input_size_lstm=input_size_lstm,
-                    hidden_size_lstm=args.hidden_size_lstm,
-                ).to(config.Config.DEVICE)
+                model = CNN_LSTM_CodeBERT(hidden_size=64).to(config.Config.DEVICE)
             optimizer = optim.SGD(model.parameters(), lr=args.lr)
             # step_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.8)
 
