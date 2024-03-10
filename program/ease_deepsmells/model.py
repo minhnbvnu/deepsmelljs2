@@ -145,7 +145,7 @@ class CNN_LSTM_CodeBERT(nn.Module):
         self.tokenizer = RobertaTokenizer.from_pretrained(
             "microsoft/codebert-base",
         )
-        self.classifier = nn.Linear(hidden_size, 1)
+        self.classifier = nn.Linear(hidden_size, 2)
         self.rnn = nn.RNN(
             self.roberta.config.hidden_size,
             hidden_size=hidden_size,
