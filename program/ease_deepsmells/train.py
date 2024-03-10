@@ -34,10 +34,8 @@ class Trainer:
         train_preds, train_targets = [], []
 
         for idx, cache in train_pbar:
-            print("cache", cache)
             inputs = self._convert_if_not_tensor(cache[0], dtype=torch.int)
-            print("inputs", inputs, type(inputs))
-            targets = self._convert_if_not_tensor(cache[1], dtype=torch.int)
+            targets = self._convert_if_not_tensor(cache[1], dtype=torch.float)
 
             with autocast(enabled=True):
                 outputs = self.model(inputs)

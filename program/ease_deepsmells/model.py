@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-import numpy as np
 import math
 from transformers import RobertaTokenizer, RobertaModel
+import time
 
 
 class CNN_LSTM(nn.Module):
@@ -145,7 +145,7 @@ class CNN_LSTM_CodeBERT(nn.Module):
         self.tokenizer = RobertaTokenizer.from_pretrained(
             "microsoft/codebert-base",
         )
-        self.classifier = nn.Linear(hidden_size, 2)
+        self.classifier = nn.Linear(hidden_size, 1)
         self.rnn = nn.RNN(
             self.roberta.config.hidden_size,
             hidden_size=hidden_size,
@@ -153,8 +153,7 @@ class CNN_LSTM_CodeBERT(nn.Module):
         )
 
     def forward(self, texts):  # assuming texts is a tensor
-        max_sequence_length = 512  # Maximum sequence length supported by RoBERTa
-        segment_size = 128  # Segment size for splitting the code
+        segment_size = 128
 
         # Break the long_code_tensor into segments
         segments = [
@@ -162,11 +161,13 @@ class CNN_LSTM_CodeBERT(nn.Module):
             for i in range(0, texts.shape[1], segment_size)
         ]
 
+        print(f"segments: {len(segments)}")
         # Initialize list to store representations of segments
         segment_representations = []
-
         # Iterate over segments and obtain representations
         for segment in segments:
+            print(f"segment: {len(segment)}")
+            start_time = time.time()
             # Pass the segment through RoBERTa model
             with torch.no_grad():
                 outputs = self.roberta(input_ids=segment)
@@ -174,6 +175,9 @@ class CNN_LSTM_CodeBERT(nn.Module):
                     0
                 )  # Average pooling over tokens
                 segment_representations.append(segment_representation)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            print(f"Time to process one segment: {elapsed_time} seconds")
 
         # Stack segment representations along the sequence dimension
         stacked_representations = torch.stack(segment_representations, dim=1)
@@ -185,5 +189,5 @@ class CNN_LSTM_CodeBERT(nn.Module):
         output = self.classifier(
             rnn_output[:, -1, :]
         )  # Take the last hidden state of the RNN
-        print("output", output)
+
         return output
